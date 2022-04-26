@@ -4,24 +4,25 @@ import (
 	"context"
 	"log"
 	"net"
-	"net/http"
 
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 
-	externalpb "github.com/ghosx/tinyurl/gen/go/proto/external"
+	counterpb "github.com/ghosx/tinyurl/gen/go/proto/counter"
 )
 
-type server struct {
-	externalpb.UnimplementedGreeterServer
+type counterServer struct {
+	counterpb.UnimplementedCounterServer
 }
 
-func NewServer() *server {
-	return &server{}
+func NewServer() *counterServer {
+	return &counterServer{}
 }
 
-func (s *server) SayHello(ctx context.Context, in *externalpb.HelloRequest) (*externalpb.HelloReply, error) {
-	return &externalpb.HelloReply{Message: in.Name + " world"}, nil
+func (s *counterServer) getCount(ctx context.Context, in *counterpb.CounterRequest) (*counterpb.CounterResponse, error) {
+	return &counterpb.CounterResponse{
+		Start: in.Current + 1,
+		End:   in.Current + 1 + int64(in.Count),
+	}, nil
 }
 
 func main() {
@@ -34,37 +35,40 @@ func main() {
 	// Create a gRPC server object
 	s := grpc.NewServer()
 	// Attach the Greeter service to the server
-	externalpb.RegisterGreeterServer(s, &server{})
+	counterpb.RegisterCounterServer(s, &counterServer{})
 	// Serve gRPC server
 	log.Println("Serving gRPC on 0.0.0.0:8080")
-	go func() {
-		log.Fatalln(s.Serve(lis))
-	}()
+	// go func() {
+	// 	log.Fatalln(s.Serve(lis))
+	// }()
+	log.Fatalln(s.Serve(lis))
 
-	// Create a client connection to the gRPC server we just started
-	// This is where the gRPC-Gateway proxies the requests
-	conn, err := grpc.DialContext(
-		context.Background(),
-		"0.0.0.0:8080",
-		grpc.WithBlock(),
-		grpc.WithInsecure(),
-	)
-	if err != nil {
-		log.Fatalln("Failed to dial server:", err)
-	}
-
-	gwmux := runtime.NewServeMux()
-	// Register Greeter
-	err = externalpb.RegisterGreeterHandler(context.Background(), gwmux, conn)
-	if err != nil {
-		log.Fatalln("Failed to register gateway:", err)
-	}
-
-	gwServer := &http.Server{
-		Addr:    ":8090",
-		Handler: gwmux,
-	}
-
-	log.Println("Serving gRPC-Gateway on http://0.0.0.0:8090")
-	log.Fatalln(gwServer.ListenAndServe())
 }
+
+// 	// Create a client connection to the gRPC server we just started
+// 	// This is where the gRPC-Gateway proxies the requests
+// 	conn, err := grpc.DialContext(
+// 		context.Background(),
+// 		"0.0.0.0:8080",
+// 		grpc.WithBlock(),
+// 		grpc.WithInsecure(),
+// 	)
+// 	if err != nil {
+// 		log.Fatalln("Failed to dial server:", err)
+// 	}
+
+// 	gwmux := runtime.NewServeMux()
+// 	// Register Greeter
+// 	err = externalpb.RegisterExternalHandler(context.Background(), gwmux, conn)
+// 	if err != nil {
+// 		log.Fatalln("Failed to register gateway:", err)
+// 	}
+
+// 	gwServer := &http.Server{
+// 		Addr:    ":8090",
+// 		Handler: gwmux,
+// 	}
+
+// 	log.Println("Serving gRPC-Gateway on http://0.0.0.0:8090")
+// 	log.Fatalln(gwServer.ListenAndServe())
+// }

@@ -22,8 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ExternalClient interface {
-	// Sends a greeting
-	SayHello(ctx context.Context, in *ExternalRequest, opts ...grpc.CallOption) (*ExternalReply, error)
+	Status(ctx context.Context, in *StatusRequest, opts ...grpc.CallOption) (*StatusResponse, error)
 }
 
 type externalClient struct {
@@ -34,9 +33,9 @@ func NewExternalClient(cc grpc.ClientConnInterface) ExternalClient {
 	return &externalClient{cc}
 }
 
-func (c *externalClient) SayHello(ctx context.Context, in *ExternalRequest, opts ...grpc.CallOption) (*ExternalReply, error) {
-	out := new(ExternalReply)
-	err := c.cc.Invoke(ctx, "/external.External/SayHello", in, out, opts...)
+func (c *externalClient) Status(ctx context.Context, in *StatusRequest, opts ...grpc.CallOption) (*StatusResponse, error) {
+	out := new(StatusResponse)
+	err := c.cc.Invoke(ctx, "/external.External/Status", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -47,8 +46,7 @@ func (c *externalClient) SayHello(ctx context.Context, in *ExternalRequest, opts
 // All implementations must embed UnimplementedExternalServer
 // for forward compatibility
 type ExternalServer interface {
-	// Sends a greeting
-	SayHello(context.Context, *ExternalRequest) (*ExternalReply, error)
+	Status(context.Context, *StatusRequest) (*StatusResponse, error)
 	mustEmbedUnimplementedExternalServer()
 }
 
@@ -56,8 +54,8 @@ type ExternalServer interface {
 type UnimplementedExternalServer struct {
 }
 
-func (UnimplementedExternalServer) SayHello(context.Context, *ExternalRequest) (*ExternalReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SayHello not implemented")
+func (UnimplementedExternalServer) Status(context.Context, *StatusRequest) (*StatusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Status not implemented")
 }
 func (UnimplementedExternalServer) mustEmbedUnimplementedExternalServer() {}
 
@@ -72,20 +70,20 @@ func RegisterExternalServer(s grpc.ServiceRegistrar, srv ExternalServer) {
 	s.RegisterService(&External_ServiceDesc, srv)
 }
 
-func _External_SayHello_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ExternalRequest)
+func _External_Status_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StatusRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ExternalServer).SayHello(ctx, in)
+		return srv.(ExternalServer).Status(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/external.External/SayHello",
+		FullMethod: "/external.External/Status",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ExternalServer).SayHello(ctx, req.(*ExternalRequest))
+		return srv.(ExternalServer).Status(ctx, req.(*StatusRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -98,8 +96,8 @@ var External_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ExternalServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "SayHello",
-			Handler:    _External_SayHello_Handler,
+			MethodName: "Status",
+			Handler:    _External_Status_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
