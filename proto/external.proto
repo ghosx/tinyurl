@@ -1,0 +1,25 @@
+syntax = "proto3";
+package external;
+
+option go_package = "github.com/ghosx/tinyurl/gen/go/proto/external";
+
+import "google/api/annotations.proto";
+
+// The greeting service definition
+service External {
+    // Sends a greeting
+    rpc SayHello (ExternalRequest) returns (ExternalReply) {
+      option (google.api.http) = {
+        post: "/v1/example/echo"
+        body: "*"
+      };
+    }
+  }
+  
+  message ExternalRequest {
+    string name = 1;
+  }
+  
+  message ExternalReply {
+    string message = 1;
+  }

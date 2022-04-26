@@ -1,0 +1,19 @@
+syntax = "proto3";
+package counter;
+option go_package="github.com/ghosx/tinyurl/gen/go/proto/external";
+
+service Counter {
+    rpc getCount (CounterRequest) returns (CounterResponse);
+}
+
+
+message CounterRequest {
+    int64 current = 1;
+    int32 count = 2;
+}
+
+
+message CounterResponse {
+    int64 start = 1;
+    int64 end = 2;
+}
