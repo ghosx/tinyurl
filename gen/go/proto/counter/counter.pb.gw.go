@@ -78,7 +78,7 @@ func RegisterCounterHandlerServer(ctx context.Context, mux *runtime.ServeMux, se
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/counter.Counter/GetCount", runtime.WithHTTPPathPattern("/counter.Counter/getCount"))
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/counter.Counter/GetCount", runtime.WithHTTPPathPattern("/counter.Counter/GetCount"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -141,7 +141,7 @@ func RegisterCounterHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/counter.Counter/GetCount", runtime.WithHTTPPathPattern("/counter.Counter/getCount"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/counter.Counter/GetCount", runtime.WithHTTPPathPattern("/counter.Counter/GetCount"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -161,7 +161,7 @@ func RegisterCounterHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 }
 
 var (
-	pattern_Counter_GetCount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"counter.Counter", "getCount"}, ""))
+	pattern_Counter_GetCount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"counter.Counter", "GetCount"}, ""))
 )
 
 var (

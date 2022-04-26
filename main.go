@@ -18,7 +18,7 @@ func NewServer() *counterServer {
 	return &counterServer{}
 }
 
-func (s *counterServer) getCount(ctx context.Context, in *counterpb.CounterRequest) (*counterpb.CounterResponse, error) {
+func (s *counterServer) GetCount(ctx context.Context, in *counterpb.CounterRequest) (*counterpb.CounterResponse, error) {
 	return &counterpb.CounterResponse{
 		Start: in.Current + 1,
 		End:   in.Current + 1 + int64(in.Count),

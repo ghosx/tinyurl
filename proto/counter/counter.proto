@@ -3,7 +3,7 @@ package counter;
 option go_package="github.com/ghosx/tinyurl/gen/go/proto/counter";
 
 service Counter {
-    rpc getCount (CounterRequest) returns (CounterResponse);
+    rpc GetCount (CounterRequest) returns (CounterResponse);
 }
 
 

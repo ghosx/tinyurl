@@ -35,7 +35,7 @@ func NewCounterClient(cc grpc.ClientConnInterface) CounterClient {
 
 func (c *counterClient) GetCount(ctx context.Context, in *CounterRequest, opts ...grpc.CallOption) (*CounterResponse, error) {
 	out := new(CounterResponse)
-	err := c.cc.Invoke(ctx, "/counter.Counter/getCount", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/counter.Counter/GetCount", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func _Counter_GetCount_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/counter.Counter/getCount",
+		FullMethod: "/counter.Counter/GetCount",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CounterServer).GetCount(ctx, req.(*CounterRequest))
@@ -96,7 +96,7 @@ var Counter_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*CounterServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "getCount",
+			MethodName: "GetCount",
 			Handler:    _Counter_GetCount_Handler,
 		},
 	},
