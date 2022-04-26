@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             (unknown)
-// source: proto/counter.proto
+// source: proto/counter/counter.proto
 
-package external
+package counter
 
 import (
 	context "context"
@@ -101,5 +101,5 @@ var Counter_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/counter.proto",
+	Metadata: "proto/counter/counter.proto",
 }

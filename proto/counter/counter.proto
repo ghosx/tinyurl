@@ -1,6 +1,6 @@
 syntax = "proto3";
 package counter;
-option go_package="github.com/ghosx/tinyurl/gen/go/proto/external";
+option go_package="github.com/ghosx/tinyurl/gen/go/proto/counter";
 
 service Counter {
     rpc getCount (CounterRequest) returns (CounterResponse);

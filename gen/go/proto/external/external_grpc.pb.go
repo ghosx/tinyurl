@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             (unknown)
-// source: proto/external.proto
+// source: proto/external/external.proto
 
 package external
 
@@ -103,5 +103,5 @@ var External_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/external.proto",
+	Metadata: "proto/external/external.proto",
 }
