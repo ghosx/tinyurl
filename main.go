@@ -2,10 +2,8 @@ package main
 
 import (
 	"context"
-	"log"
-	"net"
-
-	"google.golang.org/grpc"
+	"fmt"
+	"time"
 
 	counterpb "github.com/ghosx/tinyurl/gen/go/proto/counter"
 )
@@ -26,23 +24,10 @@ func (s *counterServer) GetCount(ctx context.Context, in *counterpb.CounterReque
 }
 
 func main() {
-	// Create a listener on TCP port
-	lis, err := net.Listen("tcp", ":8080")
-	if err != nil {
-		log.Fatalln("Failed to listen:", err)
-	}
-
-	// Create a gRPC server object
-	s := grpc.NewServer()
-	// Attach the Greeter service to the server
-	counterpb.RegisterCounterServer(s, &counterServer{})
-	// Serve gRPC server
-	log.Println("Serving gRPC on 0.0.0.0:8080")
-	// go func() {
-	// 	log.Fatalln(s.Serve(lis))
-	// }()
-	log.Fatalln(s.Serve(lis))
-
+	fmt.Println(time.Now().Local())
+	a := 1
+	fmt.Println(a)
+	fmt.Println(time.Now().Location())
 }
 
 // 	// Create a client connection to the gRPC server we just started

@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"net"
-	"time"
 
 	pb "github.com/ghosx/tinyurl/gen/go/proto/external"
 	"google.golang.org/grpc"
@@ -18,9 +17,9 @@ func NewServer() *server {
 	return &server{}
 }
 
-func (s *server) GetCount(ctx context.Context, in *pb.CreateRequest) (*pb.CreateResponse, error) {
+func (s *server) CreateUrl(ctx context.Context, in *pb.CreateRequest) (*pb.CreateResponse, error) {
 	return &pb.CreateResponse{
-		Time: in.Time.AsTime().Format(time.RFC1123),
+		ShortUrl: "http://tinyurl.com/" + in.Url,
 	}, nil
 }
 

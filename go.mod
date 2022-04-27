@@ -2,6 +2,8 @@ module github.com/ghosx/tinyurl
 
 go 1.18
 
+replace github.com/ghosx/tinyurl/gen/go/proto/external => /gen/go/proto/external
+
 require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.10.0
 	google.golang.org/genproto v0.0.0-20220317150908-0efb43f6373e
@@ -15,3 +17,4 @@ require (
 	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
 	golang.org/x/text v0.3.7 // indirect
 )
+

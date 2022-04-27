@@ -4,7 +4,7 @@ package external;
 option go_package = "github.com/ghosx/tinyurl/gen/go/proto/external";
 
 import "google/api/annotations.proto";
-import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
 
 service External {
     rpc CreateUrl (CreateRequest) returns (CreateResponse) {
@@ -25,11 +25,12 @@ service External {
 }
 
 message CreateRequest {
-  google.protobuf.Timestamp Time = 1;
+  string Url = 1;
+  int64 Expire = 2;
 }
 
 message CreateResponse {
-  string Time = 1;
+  string ShortUrl = 1;  
 }
 
 message GetRequest {
