@@ -9,7 +9,7 @@ service Counter {
 
 message CounterRequest {
     int64 current = 1;
-    int32 count = 2;
+    int64 count = 2;
 }
 
 

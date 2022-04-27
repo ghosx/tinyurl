@@ -18,9 +18,11 @@ func NewServer() *server {
 }
 
 func (s *server) GetCount(ctx context.Context, in *pb.CounterRequest) (*pb.CounterResponse, error) {
+	start, end := in.Current + 1, in.Current + int64(in.Count)
+	log.Printf("generate count:%d,%d", start, end)
 	return &pb.CounterResponse{
-		Start: in.Current + 1,
-		End:   in.Current + int64(in.Count),
+		Start: start,
+		End:   end,
 	}, nil
 }
 
