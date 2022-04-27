@@ -4,9 +4,10 @@ import (
 	"context"
 	"log"
 	"net"
+	"sync/atomic"
 
-	"google.golang.org/grpc"
 	pb "github.com/ghosx/tinyurl/gen/go/proto/counter"
+	"google.golang.org/grpc"
 )
 
 type server struct {
@@ -17,8 +18,11 @@ func NewServer() *server {
 	return &server{}
 }
 
+var globalCount uint64 = 0
+
 func (s *server) GetCount(ctx context.Context, in *pb.CounterRequest) (*pb.CounterResponse, error) {
-	start, end := in.Current + 1, in.Current + int64(in.Count)
+	start, end := globalCount, globalCount + in.Count
+	atomic.AddUint64(&globalCount, in.Count)
 	log.Printf("generate count:%d,%d", start, end)
 	return &pb.CounterResponse{
 		Start: start,

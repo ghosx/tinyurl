@@ -8,12 +8,12 @@ service Counter {
 
 
 message CounterRequest {
-    int64 current = 1;
-    int64 count = 2;
+    uint64 current = 1;
+    uint64 count = 2;
 }
 
 
 message CounterResponse {
-    int64 start = 1;
-    int64 end = 2;
+    uint64 start = 1;
+    uint64 end = 2;
 }

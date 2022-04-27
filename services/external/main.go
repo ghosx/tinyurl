@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net"
+	"strconv"
 	"time"
 
 	counterpb "github.com/ghosx/tinyurl/gen/go/proto/counter"
@@ -17,15 +18,17 @@ type server struct {
 }
 
 type Counter struct {
-	Cur int64
-	Max int64
+	Cur uint64
+	Max uint64
 }
 
 var Client counterpb.CounterClient
 var counter = Counter{Cur: 0, Max: 0}
-var CounterRange int32 = 10
+var CounterRange uint64 = 10
 
-func getCount(ctx context.Context, in *counterpb.CounterRequest) (*counterpb.CounterResponse, error) {
+func getCount(in *counterpb.CounterRequest) (*counterpb.CounterResponse, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
 	r, err := Client.GetCount(ctx, in)
 	if err != nil {
 		log.Fatalf("could not get count: %v", err)
@@ -35,16 +38,14 @@ func getCount(ctx context.Context, in *counterpb.CounterRequest) (*counterpb.Cou
 }
 
 func init() {
-	addr := "localhost:8080"
+	addr := "0.0.0.0:8080"
 	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
-	defer conn.Close()
+	//defer conn.Close()
 	Client = counterpb.NewCounterClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	r, _ := getCount(ctx, &counterpb.CounterRequest{Current: 0, Count: CounterRange})
+	r, _ := getCount(&counterpb.CounterRequest{Current: 0, Count: CounterRange})
 	counter = Counter{Cur: r.GetStart(), Max: r.GetEnd()}
 }
 
@@ -54,14 +55,12 @@ func NewServer() *server {
 
 func (s *server) CreateUrl(ctx context.Context, in *pb.CreateRequest) (*pb.CreateResponse, error) {
 	if counter.Cur >= counter.Max {
-		c, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-		r, _ := getCount(c, &counterpb.CounterRequest{Current: 0, Count: CounterRange})
+		r, _ := getCount(&counterpb.CounterRequest{Current: counter.Cur, Count: CounterRange})
 		counter = Counter{Cur: r.GetStart(), Max: r.GetEnd()}
 	}
 	counter.Cur++
 	return &pb.CreateResponse{
-		ShortUrl: "http://tinyurl.com/" + in.Url,
+		ShortUrl: "http://tinyurl.com/" + in.Url + "/" + strconv.Itoa(int(counter.Cur)),
 	}, nil
 }
 
@@ -76,7 +75,7 @@ func main() {
 	// Attach the Greeter service to the server
 	pb.RegisterExternalServer(s, &server{})
 	// Serve gRPC server
-	log.Println("Serving gRPC on 0.0.0.0:8080")
+	log.Println("Serving gRPC on 0.0.0.0:9090")
 	// go func() {
 	// 	log.Fatalln(s.Serve(lis))
 	// }()
