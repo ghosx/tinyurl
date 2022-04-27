@@ -22,7 +22,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ExternalClient interface {
-	Status(ctx context.Context, in *StatusRequest, opts ...grpc.CallOption) (*StatusResponse, error)
+	CreateUrl(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error)
+	GetUrl(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
 }
 
 type externalClient struct {
@@ -33,9 +34,18 @@ func NewExternalClient(cc grpc.ClientConnInterface) ExternalClient {
 	return &externalClient{cc}
 }
 
-func (c *externalClient) Status(ctx context.Context, in *StatusRequest, opts ...grpc.CallOption) (*StatusResponse, error) {
-	out := new(StatusResponse)
-	err := c.cc.Invoke(ctx, "/external.External/Status", in, out, opts...)
+func (c *externalClient) CreateUrl(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error) {
+	out := new(CreateResponse)
+	err := c.cc.Invoke(ctx, "/external.External/CreateUrl", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *externalClient) GetUrl(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error) {
+	out := new(GetResponse)
+	err := c.cc.Invoke(ctx, "/external.External/GetUrl", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +56,8 @@ func (c *externalClient) Status(ctx context.Context, in *StatusRequest, opts ...
 // All implementations must embed UnimplementedExternalServer
 // for forward compatibility
 type ExternalServer interface {
-	Status(context.Context, *StatusRequest) (*StatusResponse, error)
+	CreateUrl(context.Context, *CreateRequest) (*CreateResponse, error)
+	GetUrl(context.Context, *GetRequest) (*GetResponse, error)
 	mustEmbedUnimplementedExternalServer()
 }
 
@@ -54,8 +65,11 @@ type ExternalServer interface {
 type UnimplementedExternalServer struct {
 }
 
-func (UnimplementedExternalServer) Status(context.Context, *StatusRequest) (*StatusResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Status not implemented")
+func (UnimplementedExternalServer) CreateUrl(context.Context, *CreateRequest) (*CreateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateUrl not implemented")
+}
+func (UnimplementedExternalServer) GetUrl(context.Context, *GetRequest) (*GetResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUrl not implemented")
 }
 func (UnimplementedExternalServer) mustEmbedUnimplementedExternalServer() {}
 
@@ -70,20 +84,38 @@ func RegisterExternalServer(s grpc.ServiceRegistrar, srv ExternalServer) {
 	s.RegisterService(&External_ServiceDesc, srv)
 }
 
-func _External_Status_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(StatusRequest)
+func _External_CreateUrl_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ExternalServer).Status(ctx, in)
+		return srv.(ExternalServer).CreateUrl(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/external.External/Status",
+		FullMethod: "/external.External/CreateUrl",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ExternalServer).Status(ctx, req.(*StatusRequest))
+		return srv.(ExternalServer).CreateUrl(ctx, req.(*CreateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _External_GetUrl_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExternalServer).GetUrl(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/external.External/GetUrl",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExternalServer).GetUrl(ctx, req.(*GetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -96,8 +128,12 @@ var External_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ExternalServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Status",
-			Handler:    _External_Status_Handler,
+			MethodName: "CreateUrl",
+			Handler:    _External_CreateUrl_Handler,
+		},
+		{
+			MethodName: "GetUrl",
+			Handler:    _External_GetUrl_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

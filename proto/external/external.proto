@@ -4,21 +4,38 @@ package external;
 option go_package = "github.com/ghosx/tinyurl/gen/go/proto/external";
 
 import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
 
 service External {
-    rpc Status (StatusRequest) returns (StatusResponse) {
+    rpc CreateUrl (CreateRequest) returns (CreateResponse) {
       option (google.api.http) = {
-        post: "/status"
+        post: "/api/c"
         body: "*"
       };
     }
 
-  }
-  
-  message StatusRequest {
+    rpc GetUrl (GetRequest) returns (GetResponse) {
+      option (google.api.http) = {
+        post: "/api/g"
+        body: "*"
+      };
+    }
 
-  }
-  
-  message StatusResponse {
-    string message = 1;
-  }
+
+}
+
+message CreateRequest {
+  google.protobuf.Timestamp Time = 1;
+}
+
+message CreateResponse {
+  string Time = 1;
+}
+
+message GetRequest {
+
+}
+
+message GetResponse {
+
+}
