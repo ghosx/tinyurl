@@ -4,11 +4,15 @@ import (
 	"fmt"
 	"time"
 )
+// test
 
 
 func main() {
 	fmt.Println(time.Now().Local())
+	a := 1
+	fmt.Println(a)
 	fmt.Println(time.Now().Location())
+	fmt.Println()
 }
 
 // 	// Create a client connection to the gRPC server we just started

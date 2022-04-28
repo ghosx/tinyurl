@@ -4,11 +4,13 @@ import (
 	"context"
 	"log"
 	"net"
+	"net/http"
 	"strconv"
 	"time"
 
 	counterpb "github.com/ghosx/tinyurl/gen/go/proto/counter"
 	pb "github.com/ghosx/tinyurl/gen/go/proto/external"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -63,6 +65,7 @@ func (s *server) CreateUrl(ctx context.Context, in *pb.CreateRequest) (*pb.Creat
 		ShortUrl: "http://tinyurl.com/" + in.Url + "/" + strconv.Itoa(int(counter.Cur)),
 	}, nil
 }
+// test
 
 func main() {
 	// Create a listener on TCP port
@@ -76,9 +79,34 @@ func main() {
 	pb.RegisterExternalServer(s, &server{})
 	// Serve gRPC server
 	log.Println("Serving gRPC on 0.0.0.0:9090")
-	// go func() {
-	// 	log.Fatalln(s.Serve(lis))
-	// }()
-	log.Fatalln(s.Serve(lis))
+	go func() {
+		log.Fatalln(s.Serve(lis))
+	}()
+	
+
+	conn, err := grpc.DialContext(
+				context.Background(),
+				"0.0.0.0:9090",
+				grpc.WithBlock(),
+				grpc.WithInsecure(),
+			)
+	if err != nil {
+		log.Fatalln("Failed to dial server:", err)
+	}
+	gwmux := runtime.NewServeMux()
+// 	// Register Greeter
+	err = pb.RegisterExternalHandler(context.Background(), gwmux, conn)
+	if err != nil {
+		log.Fatalln("Failed to register gateway:", err)
+	}
+
+	gwServer := &http.Server{
+		Addr:    ":9091",
+		Handler: gwmux,
+	}
+
+	log.Println("Serving gRPC-Gateway on http://0.0.0.0:9091")
+	log.Fatalln(gwServer.ListenAndServe())
+
 
 }
