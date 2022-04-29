@@ -2,7 +2,11 @@ package main
 
 import (
 	"context"
+	"crypto/md5"
+	"encoding/base64"
+	"fmt"
 	"log"
+	"math/rand"
 	"net"
 	"net/http"
 	"strconv"
@@ -22,10 +26,30 @@ type server struct {
 type Counter struct {
 	Cur uint64
 	Max uint64
+	L   []uint64
+}
+
+func NewCounter(cur, max uint64) *Counter {
+	l := make([]uint64, max-cur)
+	for i := 0; i < int(max-cur); i++ {
+		l[i] = cur + uint64(i)
+	}
+	rand.Shuffle(len(l), func(i, j int) {
+		l[i], l[j] = l[j], l[i]
+	})
+	fmt.Println("l", l)
+	return &Counter{Cur: cur, Max: max, L: l}
+}
+
+func (c *Counter) getCounter() uint64 {
+	r := c.L[0]
+	c.L = c.L[1:]
+	c.Cur++
+	return r
 }
 
 var Client counterpb.CounterClient
-var counter = Counter{Cur: 0, Max: 0}
+var counter *Counter
 var CounterRange uint64 = 10
 
 func getCount(in *counterpb.CounterRequest) (*counterpb.CounterResponse, error) {
@@ -48,7 +72,7 @@ func init() {
 	//defer conn.Close()
 	Client = counterpb.NewCounterClient(conn)
 	r, _ := getCount(&counterpb.CounterRequest{Current: 0, Count: CounterRange})
-	counter = Counter{Cur: r.GetStart(), Max: r.GetEnd()}
+	counter = NewCounter(r.GetStart(), r.GetEnd())
 }
 
 func NewServer() *server {
@@ -58,18 +82,25 @@ func NewServer() *server {
 func (s *server) CreateUrl(ctx context.Context, in *pb.CreateRequest) (*pb.CreateResponse, error) {
 	if counter.Cur >= counter.Max {
 		r, _ := getCount(&counterpb.CounterRequest{Current: counter.Cur, Count: CounterRange})
-		counter = Counter{Cur: r.GetStart(), Max: r.GetEnd()}
+		counter = NewCounter(r.GetStart(), r.GetEnd())
 	}
-	counter.Cur++
+	r := counter.getCounter()
+	fmt.Println("r", r)
+	rr := strconv.FormatUint(r, 2)
+	m := md5.Sum([]byte(rr))
+	fmt.Println("m", m)
+	fmt.Printf("%x\n", m)
+	u := base64.URLEncoding.EncodeToString(m[:])
+	u = u[:8]
+	fmt.Println("create url:", u)
 	return &pb.CreateResponse{
-		ShortUrl: "http://tinyurl.com/" + in.Url + "/" + strconv.Itoa(int(counter.Cur)),
+		ShortUrl: "http://tinyurl.com/" + u,
 	}, nil
 }
-// test
 
 func main() {
 	// Create a listener on TCP port
-	lis, err := net.Listen("tcp", ":9090")
+	lis, err := net.Listen("tcp", ":8000")
 	if err != nil {
 		log.Fatalln("Failed to listen:", err)
 	}
@@ -78,35 +109,33 @@ func main() {
 	// Attach the Greeter service to the server
 	pb.RegisterExternalServer(s, &server{})
 	// Serve gRPC server
-	log.Println("Serving gRPC on 0.0.0.0:9090")
+	log.Println("Serving gRPC on :8000")
 	go func() {
 		log.Fatalln(s.Serve(lis))
 	}()
-	
 
 	conn, err := grpc.DialContext(
-				context.Background(),
-				"0.0.0.0:9090",
-				grpc.WithBlock(),
-				grpc.WithInsecure(),
-			)
+		context.Background(),
+		"0.0.0.0:8000",
+		grpc.WithBlock(),
+		grpc.WithInsecure(),
+	)
 	if err != nil {
 		log.Fatalln("Failed to dial server:", err)
 	}
 	gwmux := runtime.NewServeMux()
-// 	// Register Greeter
+	// 	// Register Greeter
 	err = pb.RegisterExternalHandler(context.Background(), gwmux, conn)
 	if err != nil {
 		log.Fatalln("Failed to register gateway:", err)
 	}
 
 	gwServer := &http.Server{
-		Addr:    ":9091",
+		Addr:    ":80",
 		Handler: gwmux,
 	}
 
-	log.Println("Serving gRPC-Gateway on http://0.0.0.0:9091")
+	log.Println("Serving gRPC-Gateway on http://0.0.0.0:80")
 	log.Fatalln(gwServer.ListenAndServe())
-
 
 }

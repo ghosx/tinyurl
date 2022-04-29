@@ -1,0 +1,14 @@
+FROM golang:1.18
+ENV GOOS=linux
+ENV CGO_ENABLED=0
+WORKDIR /app
+COPY . /app
+RUN go build -o fairping-api .
+
+FROM alpine:latest
+ENV GIN_MODE=release
+WORKDIR /app
+COPY --from=0 /app/fairping-api .
+COPY --from=0 /app/config/release.toml /app/config/
+EXPOSE 8000
+CMD ["./fairping-api"]

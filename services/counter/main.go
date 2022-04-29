@@ -21,7 +21,7 @@ func NewServer() *server {
 var globalCount uint64 = 0
 
 func (s *server) GetCount(ctx context.Context, in *pb.CounterRequest) (*pb.CounterResponse, error) {
-	start, end := globalCount, globalCount + in.Count
+	start, end := globalCount, globalCount+in.Count
 	atomic.AddUint64(&globalCount, in.Count)
 	log.Printf("generate count:%d,%d", start, end)
 	return &pb.CounterResponse{
@@ -30,10 +30,9 @@ func (s *server) GetCount(ctx context.Context, in *pb.CounterRequest) (*pb.Count
 	}, nil
 }
 
-
-func main(){
+func main() {
 	// Create a listener on TCP port
-	lis, err := net.Listen("tcp", ":8080")
+	lis, err := net.Listen("tcp", ":9000")
 	if err != nil {
 		log.Fatalln("Failed to listen:", err)
 	}
@@ -42,11 +41,10 @@ func main(){
 	// Attach the Greeter service to the server
 	pb.RegisterCounterServer(s, &server{})
 	// Serve gRPC server
-	log.Println("Serving gRPC on 0.0.0.0:8080")
+	log.Println("Serving gRPC on :9000")
 	// go func() {
 	// 	log.Fatalln(s.Serve(lis))
 	// }()
 	log.Fatalln(s.Serve(lis))
 
 }
-

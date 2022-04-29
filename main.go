@@ -2,17 +2,28 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"time"
+	"math/rand"
 )
-// test
 
+// test
 
 func main() {
 	fmt.Println(time.Now().Local())
-	a := 1
-	fmt.Println(a)
-	fmt.Println(time.Now().Location())
-	fmt.Println()
+	var b int64 = 8
+	s := fmt.Sprintf("%b", b)
+	fmt.Println("b=", s)
+	fmt.Println(strconv.FormatInt(b, 2))
+	l := make([]int, 10)
+	for i := 0; i < 10; i++ {
+		l[i] = i
+	}
+	fmt.Println(l)
+	rand.Shuffle(len(l), func(i, j int) {
+		l[i], l[j] = l[j], l[i]
+	})
+	fmt.Println(l)
 }
 
 // 	// Create a client connection to the gRPC server we just started
