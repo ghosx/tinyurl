@@ -137,5 +137,4 @@ func main() {
 
 	log.Println("Serving gRPC-Gateway on http://0.0.0.0:80")
 	log.Fatalln(gwServer.ListenAndServe())
-
 }
